@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Дурак Онлайн Mini App</title>
+    <!-- Подключаем самую точную версию скрипта Telegram -->
     <script src="telegram.org"></script>
     <style>
         body {
@@ -22,6 +23,7 @@
             text-align: center;
             padding: 10px;
             background: rgba(0,0,0,0.2);
+            font-size: 14px;
         }
         .game-table {
             flex-grow: 1;
@@ -71,25 +73,23 @@
 
     <div class="header">
         <div id="user-name">Загрузка игрока...</div>
+        <div id="trump-info" style="margin-top: 5px; color: #ffd700;"></div>
     </div>
 
-    <!-- Сюда будут перемещаться карты при клике -->
     <div class="game-table" id="table">
-        <!-- Изначально стол пустой -->
+        <!-- Стол изначально пустой -->
     </div>
 
-    <div class="player-hand" id="hand">
-        <div class="card" onclick="playCard(this)">♠️<br>6</div>
-        <div class="card red" onclick="playCard(this)">♥️<br>T</div>
-        <div class="card" onclick="playCard(this)">♣️<br>10</div>
-        <div class="card red" onclick="playCard(this)">♦️<br>D</div>
-    </div>
+    <!-- Сюда карты будут добавляться автоматически через JavaScript -->
+    <div class="player-hand" id="hand"></div>
 
     <script>
+        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
+        // Отображаем имя игрока
         const userField = document.getElementById('user-name');
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             userField.innerText = `Игрок: ${tg.initDataUnsafe.user.first_name}`;
@@ -97,21 +97,62 @@
             userField.innerText = "Игрок: Локальный тест";
         }
 
-        // Новая функция: забирает карту из руки и кладет на стол
+        // Логика создания случайных карт прямо на клиенте
+        const suits = [
+            { icon: '♠️', isRed: false },
+            { icon: '♣️', isRed: false },
+            { icon: '♥️', isRed: true },
+            { icon: '♦️', isRed: true }
+        ];
+        const ranks = ['6', '7', '8', '9', '10', 'V', 'D', 'K', 'T'];
+
+        // Выбираем случайный козырь для красоты
+        const randomTrump = suits[Math.floor(Math.random() * suits.length)];
+        document.getElementById('trump-info').innerText = `Козырь этой раздачи: ${randomTrump.icon}`;
+
+        // Функция генерации 6 случайных карт в руку игрока
+        function distributeCards() {
+            const hand = document.getElementById('hand');
+            hand.innerHTML = ''; // Очищаем руку
+
+            for (let i = 0; i < 6; i++) {
+                const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+                const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+
+                // Создаем элемент карты
+                const card = document.createElement('div');
+                card.className = 'card' + (randomSuit.isRed ? ' red' : '');
+                card.innerHTML = `${randomSuit.icon}<br>${randomRank}`;
+                
+                // Добавляем событие клика
+                card.onclick = function() { playCard(this); };
+                
+                hand.appendChild(card);
+            }
+        }
+
+        // Функция хода картой
         function playCard(cardElement) {
             const table = document.getElementById('table');
             
-            // Отключаем возможность кликнуть по ней еще раз
-            cardElement.removeAttribute('onclick');
+            // Убираем кликабельность
+            cardElement.onclick = null;
             
-            // Перемещаем элемент карты внутрь игрового стола
+            // Перемещаем карту на стол
             table.appendChild(cardElement);
             
-            // Небольшая вибрация телефона при ходе (работает только в Telegram!)
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
+            // Принудительный вызов вибрации для iOS через официальный интерфейс
+            try {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+            } catch (e) {
+                console.log("Вибрация не поддерживается устройством");
             }
         }
+
+        // Запускаем раздачу карт при старте приложения
+        distributeCards();
     </script>
 </body>
 </html>
