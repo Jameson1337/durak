@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Дурак Онлайн Mini App</title>
-    <!-- Подключаем официальный скрипт Telegram -->
     <script src="telegram.org"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #1b4d3e; /* Зеленое сукно стола */
+            background-color: #1b4d3e;
             font-family: sans-serif;
             color: white;
             display: flex;
@@ -29,14 +28,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 10px;
             border: 2px solid #143d31;
             margin: 10px;
             border-radius: 15px;
+            background: radial-gradient(circle, #1f5c4a 0%, #143d31 100%);
+            flex-wrap: wrap;
+            padding: 10px;
         }
         .player-hand {
             display: flex;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
             padding: 20px;
             background: rgba(0,0,0,0.1);
             min-height: 90px;
@@ -54,8 +57,14 @@
             justify-content: space-between;
             font-weight: bold;
             font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            user-select: none;
         }
-        .red { color: #d32f2f; } /* Красный цвет для червей и бубен */
+        .card:active {
+            transform: scale(0.95);
+        }
+        .red { color: #d32f2f; }
     </style>
 </head>
 <body>
@@ -64,30 +73,44 @@
         <div id="user-name">Загрузка игрока...</div>
     </div>
 
-    <div class="game-table">
-        <div id="status">Игровой стол пуст</div>
+    <!-- Сюда будут перемещаться карты при клике -->
+    <div class="game-table" id="table">
+        <!-- Изначально стол пустой -->
     </div>
 
-    <!-- Рука игрока с тестовыми картами -->
-    <div class="player-hand">
-        <div class="card">♠️<br>6</div>
-        <div class="card red">♥️<br>T</div>
-        <div class="card">♣️<br>10</div>
-        <div class="card red">♦️<br>D</div>
+    <div class="player-hand" id="hand">
+        <div class="card" onclick="playCard(this)">♠️<br>6</div>
+        <div class="card red" onclick="playCard(this)">♥️<br>T</div>
+        <div class="card" onclick="playCard(this)">♣️<br>10</div>
+        <div class="card red" onclick="playCard(this)">♦️<br>D</div>
     </div>
 
     <script>
-        // Инициализируем Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.ready(); // Сообщаем Telegram, что приложение загрузилось
-        tg.expand(); // Разворачиваем приложение на весь экран телефона
+        tg.ready();
+        tg.expand();
 
-        # Находим блок имени и вставляем туда имя игрока из Telegram
         const userField = document.getElementById('user-name');
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             userField.innerText = `Игрок: ${tg.initDataUnsafe.user.first_name}`;
         } else {
             userField.innerText = "Игрок: Локальный тест";
+        }
+
+        // Новая функция: забирает карту из руки и кладет на стол
+        function playCard(cardElement) {
+            const table = document.getElementById('table');
+            
+            // Отключаем возможность кликнуть по ней еще раз
+            cardElement.removeAttribute('onclick');
+            
+            // Перемещаем элемент карты внутрь игрового стола
+            table.appendChild(cardElement);
+            
+            // Небольшая вибрация телефона при ходе (работает только в Telegram!)
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
         }
     </script>
 </body>
