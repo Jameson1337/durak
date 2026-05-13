@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Дурак Онлайн Mini App</title>
+    <!-- Подключаем официальный скрипт Telegram -->
+    <script src="telegram.org"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1b4d3e; /* Зеленое сукно стола */
+            font-family: sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+        .game-table {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #143d31;
+            margin: 10px;
+            border-radius: 15px;
+        }
+        .player-hand {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 20px;
+            background: rgba(0,0,0,0.1);
+            min-height: 90px;
+        }
+        .card {
+            background: white;
+            color: black;
+            border-radius: 8px;
+            padding: 10px;
+            width: 45px;
+            height: 70px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .red { color: #d32f2f; } /* Красный цвет для червей и бубен */
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div id="user-name">Загрузка игрока...</div>
+    </div>
+
+    <div class="game-table">
+        <div id="status">Игровой стол пуст</div>
+    </div>
+
+    <!-- Рука игрока с тестовыми картами -->
+    <div class="player-hand">
+        <div class="card">♠️<br>6</div>
+        <div class="card red">♥️<br>T</div>
+        <div class="card">♣️<br>10</div>
+        <div class="card red">♦️<br>D</div>
+    </div>
+
+    <script>
+        // Инициализируем Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Сообщаем Telegram, что приложение загрузилось
+        tg.expand(); // Разворачиваем приложение на весь экран телефона
+
+        # Находим блок имени и вставляем туда имя игрока из Telegram
+        const userField = document.getElementById('user-name');
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            userField.innerText = `Игрок: ${tg.initDataUnsafe.user.first_name}`;
+        } else {
+            userField.innerText = "Игрок: Локальный тест";
+        }
+    </script>
+</body>
+</html>
