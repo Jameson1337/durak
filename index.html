@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Дурак Онлайн Mini App</title>
-    <!-- Подключаем самую точную версию скрипта Telegram -->
-    <script src="telegram.org"></script>
+    <!-- Подключаем официальный проверенный скрипт Telegram -->
+    <script src="https://telegram.org"></script>
     <style>
         body {
             margin: 0;
@@ -76,20 +76,17 @@
         <div id="trump-info" style="margin-top: 5px; color: #ffd700;"></div>
     </div>
 
-    <div class="game-table" id="table">
-        <!-- Стол изначально пустой -->
-    </div>
+    <div class="game-table" id="table"></div>
 
-    <!-- Сюда карты будут добавляться автоматически через JavaScript -->
     <div class="player-hand" id="hand"></div>
 
     <script>
-        // Инициализация Telegram Web App
+        // Безопасная инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // Отображаем имя игрока
+        // Отображение имени
         const userField = document.getElementById('user-name');
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             userField.innerText = `Игрок: ${tg.initDataUnsafe.user.first_name}`;
@@ -97,7 +94,7 @@
             userField.innerText = "Игрок: Локальный тест";
         }
 
-        // Логика создания случайных карт прямо на клиенте
+        // Параметры карт
         const suits = [
             { icon: '♠️', isRed: false },
             { icon: '♣️', isRed: false },
@@ -106,52 +103,44 @@
         ];
         const ranks = ['6', '7', '8', '9', '10', 'V', 'D', 'K', 'T'];
 
-        // Выбираем случайный козырь для красоты
+        // Случайный козырь
         const randomTrump = suits[Math.floor(Math.random() * suits.length)];
         document.getElementById('trump-info').innerText = `Козырь этой раздачи: ${randomTrump.icon}`;
 
-        // Функция генерации 6 случайных карт в руку игрока
+        // Раздача карт
         function distributeCards() {
             const hand = document.getElementById('hand');
-            hand.innerHTML = ''; // Очищаем руку
+            hand.innerHTML = ''; 
 
             for (let i = 0; i < 6; i++) {
                 const randomSuit = suits[Math.floor(Math.random() * suits.length)];
                 const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
 
-                // Создаем элемент карты
                 const card = document.createElement('div');
                 card.className = 'card' + (randomSuit.isRed ? ' red' : '');
                 card.innerHTML = `${randomSuit.icon}<br>${randomRank}`;
                 
-                // Добавляем событие клика
                 card.onclick = function() { playCard(this); };
-                
                 hand.appendChild(card);
             }
         }
 
-        // Функция хода картой
+        // Логика хода
         function playCard(cardElement) {
             const table = document.getElementById('table');
-            
-            // Убираем кликабельность
             cardElement.onclick = null;
-            
-            // Перемещаем карту на стол
             table.appendChild(cardElement);
             
-            // Принудительный вызов вибрации для iOS через официальный интерфейс
+            // Запуск вибрации
             try {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('medium');
                 }
             } catch (e) {
-                console.log("Вибрация не поддерживается устройством");
+                console.log("Вибрация не поддерживается");
             }
         }
 
-        // Запускаем раздачу карт при старте приложения
         distributeCards();
     </script>
 </body>
